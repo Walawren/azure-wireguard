@@ -1,7 +1,3 @@
-locals {
-  vnet_address = "10.1.2.0/24"
-}
-
 resource "azurerm_virtual_network" "vnet" {
   name                = "${azurerm_resource_group.rgrp.name}-VNET"
   resource_group_name = azurerm_resource_group.rgrp.name
