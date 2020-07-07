@@ -1,4 +1,3 @@
-
 resource "azurerm_network_security_group" "nsg" {
   name                = "${azurerm_resource_group.rgrp.name}-NSG"
   location            = azurerm_resource_group.rgrp.location
@@ -13,7 +12,7 @@ resource "azurerm_network_security_group" "nsg" {
     source_address_prefix      = "Internet"
     source_port_range          = "*"
     destination_address_prefix = "VirtualNetwork"
-    destination_port_range     = 51820
+    destination_port_range     = var.wg_server_port
   }
 
   security_rule {

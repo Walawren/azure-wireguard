@@ -20,6 +20,10 @@ provider random {
   version = "~> 2.2"
 }
 
+locals {
+  vnet_address = "10.1.2.0/24"
+}
+
 terraform {
   backend "remote" {
     # The name of your Terraform Cloud organization.
