@@ -1,7 +1,7 @@
 resource "azurerm_key_vault" "vault" {
-  name                = "${data.azurerm_resource_group.rgrp.name}-KV"
-  location            = data.azurerm_resource_group.rgrp.location
-  resource_group_name = data.azurerm_resource_group.rgrp.name
+  name                = "${azurerm_resource_group.rgrp.name}-KV"
+  location            = azurerm_resource_group.rgrp.location
+  resource_group_name = azurerm_resource_group.rgrp.name
 
   sku_name = "standard"
 

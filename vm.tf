@@ -21,13 +21,12 @@ resource "azurerm_linux_virtual_machine" "main" {
   network_interface_ids = [azurerm_network_interface.nic.id]
   size                  = "Standard_DS2_v2"
   admin_username        = "walawren"
-  computer_name         = "${tolower(azurerm_resource_group.rgrp.name)}vm"
+  computer_name         = "${lower(azurerm_resource_group.rgrp.name)}vm"
   custom_data           = filebase64("./CustomScripts/vm_init.sh")
 
   os_disk {
     name                 = "${azurerm_resource_group.rgrp.name}-VM-disk1"
     caching              = "ReadWrite"
-    create_option        = "FromImage"
     storage_account_type = "Standard_LRS"
   }
 
