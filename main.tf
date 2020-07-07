@@ -14,6 +14,10 @@ provider azurerm {
   features {}
 }
 
+provider random {
+  version = "~> 2.2"
+}
+
 terraform {
   backend "remote" {
     # The name of your Terraform Cloud organization.
