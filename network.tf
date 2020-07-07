@@ -26,18 +26,3 @@ resource "azurerm_public_ip" "ip" {
   allocation_method = "Static"
 }
 
-resource "azurerm_network_interface" "nic" {
-  name                = "${azurerm_resource_group.rgrp.name}-NIC"
-  location            = azurerm_resource_group.rgrp.location
-  resource_group_name = azurerm_resource_group.rgrp.name
-
-  ip_configuration {
-    name                          = "ipconfig1"
-    subnet_id                     = azurerm_subnet.subnet.id
-    private_ip_address_allocation = "Dynamic"
-    public_ip_address_id          = azurerm_public_ip.ip.id
-  }
-
-  enable_accelerated_networking = true
-}
-

@@ -3,6 +3,8 @@ variable client_secret { type = string }
 variable tenant_id { type = string }
 variable subscription_id { type = string }
 
+data "azurerm_client_config" "current" {}
+
 provider azurerm {
   version = "~> 2.17"
 
