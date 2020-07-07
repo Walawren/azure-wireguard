@@ -29,18 +29,6 @@ resource "azurerm_network_security_group" "nsg" {
   }
 
   security_rule {
-    name                       = "DenyAllInbound"
-    priority                   = 4000
-    direction                  = "Inbound"
-    access                     = "Deny"
-    protocol                   = "*"
-    source_address_prefix      = "*"
-    source_port_range          = "*"
-    destination_address_prefix = "*"
-    destination_port_range     = "*"
-  }
-
-  security_rule {
     name                       = "AllowInternetOutbound"
     priority                   = 100
     direction                  = "Outbound"
