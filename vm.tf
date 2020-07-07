@@ -13,14 +13,23 @@ resource "azurerm_network_interface" "nic" {
   enable_accelerated_networking = true
 }
 
+resource "random_password" "vm_password" {
+  length           = 30
+  special          = true
+  override_special = "_%@"
+}
+
 resource "azurerm_linux_virtual_machine" "main" {
-  name                = "${azurerm_resource_group.rgrp.name}-MainVM"
+  name                = "${azurerm_resource_group.rgrp.name}-VM"
   location            = azurerm_resource_group.rgrp.location
   resource_group_name = azurerm_resource_group.rgrp.name
 
+  admin_username                  = "walawren"
+  admin_password                  = random_password.vm_password.result
+  disable_password_authentication = false
+
   network_interface_ids = [azurerm_network_interface.nic.id]
   size                  = "Standard_DS2_v2"
-  admin_username        = "walawren"
   computer_name         = "${lower(azurerm_resource_group.rgrp.name)}vm"
   custom_data           = filebase64("./CustomScripts/vm_init.sh")
 
