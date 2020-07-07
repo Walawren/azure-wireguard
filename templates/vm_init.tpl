@@ -21,6 +21,8 @@ apt-get -y install azure-cli
 
 ufw allow ssh
 ufw allow ${wg_server_port}/udp
-ufw allow from ${wg_server_cidr} to ${wg_server_address} port 53
+ufw allow from ${wg_server_cidr} to any port 53
+ufw allow from ${wg_server_cidr} to any port 80
+ufw allow from ${wg_server_cidr} to any port 443
 ufw --force enable
 
