@@ -65,13 +65,13 @@ resource "azurerm_network_security_group" "nsg" {
   }
 }
 
-resource "azurerm_subnet_network_security_group_association" "association" {
+resource "azurerm_subnet_network_security_group_association" "subnet_association" {
   subnet_id                 = azurerm_subnet.subnet.id
   network_security_group_id = azurerm_network_security_group.nsg.id
 }
 
-resource "azurerm_network_interface_application_security_group_association" "association" {
-  network_interface_id          = azurerm_network_interface.nic.id
-  application_security_group_id = azurerm_application_security_group.nsg.id
+resource "azurerm_network_interface_security_group_association" "nic_association" {
+  network_interface_id      = azurerm_network_interface.nic.id
+  network_security_group_id = azurerm_network_security_group.nsg.id
 }
 

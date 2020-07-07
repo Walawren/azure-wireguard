@@ -21,7 +21,7 @@ resource "azurerm_virtual_machine" "main" {
   os_profile {
     computer_name  = "hostname"
     admin_username = "walawren"
-    admin_password = random_password.vm_password
+    admin_password = random_password.vm_password.result
   }
 
   storage_image_reference {
