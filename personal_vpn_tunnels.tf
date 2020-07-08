@@ -16,10 +16,8 @@ data "template_file" "personal_vpn_tunnels" {
 }
 
 resource "azurerm_virtual_machine_extension" "personal_tunnels" {
-  name                 = "${azurerm_resource_group.rgrp.name}-PersonalTunnels"
-  resource_group_name  = azurerm_resource_group.rgrp.name
-  location             = azurerm_resource_group.location
-  virtual_machine_name = azurerm_linux_virtual_machine.main.name
+  name               = "${azurerm_resource_group.rgrp.name}-PersonalTunnels"
+  virtual_machine_id = azurerm_linux_virtual_machine.main.id
 
   publisher            = "Microsoft.Azure.Extensions"
   type                 = "CustomScript"
