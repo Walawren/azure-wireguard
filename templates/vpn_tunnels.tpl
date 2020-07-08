@@ -5,6 +5,7 @@ vm_identity_id=${vm_identity_id}
 vault_name=${vault_name}
 wg_server_address=${wg_server_address}
 tunnels=${tunnels}
+tunnels_array=(${tunnels//;/ })
 dns_server=${dns_server}
 wg_server_endpoint=${wg_server_endpoint}
 wg_server_port=${wg_server_port}
@@ -51,7 +52,8 @@ wg_server_substr_length=$((${#wg_server_address} - 1))
 wg_server_last_ip=$(wg_server_address | cut -d'.' -f 4)
 count=$((wg_server_last_ip + 1))
 addr_prefix=${$wg_server_address:0:$wg_server_substr_length}
-for p in "${tunnels[@]}"
+
+for p in "${tunnels_array[@]}"
 do
     private_secret_name=$pPrivateKey
     public_secret_name=$pPublicKey

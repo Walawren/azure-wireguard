@@ -6,7 +6,7 @@ data "template_file" "personal_vpn_tunnels" {
     vm_identity_id              = azurerm_user_assigned_identity.vm.id
     vault_name                  = azurerm_key_vault.vault.name
     wg_server_address           = local.wg_server_address
-    tunnels                     = var.personal_vpn_tunnels
+    tunnels                     = join(";", var.personal_vpn_tunnels)
     dns_server                  = var.dns_server
     wg_server_endpoint          = azurerm_public_ip.ip.fqdn
     wg_server_port              = var.wg_server_port
