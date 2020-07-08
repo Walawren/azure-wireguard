@@ -2,7 +2,7 @@
 
 ## Install required packages
 apt-get -y update
-apt-get -y install ca-certificates curl apt-transport-https lsb-release gnupg unbound jq
+apt-get -y install ca-certificates curl apt-transport-https lsb-release gnupg jq
 
 ## Install WireGuard
 add-apt-repository "ppa:wireguard/wireguard"

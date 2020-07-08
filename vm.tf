@@ -1,7 +1,3 @@
-locals {
-  wg_server_address = cidrhost(var.wg_server_cidr, 1)
-}
-
 resource "azurerm_network_interface" "nic" {
   name                = "${azurerm_resource_group.rgrp.name}-NIC"
   location            = azurerm_resource_group.rgrp.location

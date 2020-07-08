@@ -21,7 +21,9 @@ provider random {
 }
 
 locals {
-  vnet_address = "10.1.2.0/24"
+  vnet_address                = "10.1.2.0/24"
+  wg_server_address           = cidrhost(var.wg_server_cidr, 1)
+  wg_server_address_with_cidr = "${local.wg_server_address}/${split("/", var.wg_server_network_cidr)[1]}"
 }
 
 terraform {
