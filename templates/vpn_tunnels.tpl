@@ -4,7 +4,7 @@
 vm_identity_id=${vm_identity_id}
 vault_name=${vault_name}
 wg_server_address=${wg_server_address}
-personal_peers=${personal_peers}
+tunnels=${tunnels}
 dns_server=${dns_server}
 wg_server_endpoint=${wg_server_endpoint}
 wg_server_port=${wg_server_port}
@@ -14,11 +14,8 @@ wg_server_address_with_cidr=${wg_server_address_with_cidr}
 # Login in Azure
 az login --identity -u $vm_identity_id
 
-# Delee existing configuration files
-CONF_DIRECTORY=/etc/wireguard
-find . -type f -name '$CONF_DIRECTORY/*.conf' -delete
-
 ## IP Forwarding
+CONF_DIRECTORY=/etc/wireguard
 mkdir -p $CONF_DIRECTORY
 chown -R root:root $CONF_DIRECTORY/
 chmod -R og-rwx $CONF_DIRECTORY/*
@@ -32,7 +29,11 @@ mkdir -p $KEYS_DIRECTORY
 umask 077
 
 # Pull keys from Azure instead of local file
-az keyvault secret show --vault-name $vault_name --name ServerPrivateKey | jq -r '.value' | tee $KEYS_DIRECTORY/server_private_key || wg genkey | tee $KEYS_DIRECTORY/server_private_key | wg pubkey > $KEYS_DIRECTORY/server_public_key
+server_private_conf_path=$KEYS_DIRECTORY/server_private_key
+server_public_conf_path=$KEYS_DIRECTORY/server_public_key
+rm $server_private_conf_path
+rm $server_public_conf_path
+az keyvault secret show --vault-name $vault_name --name ServerPrivateKey | jq -r '.value' | tee $server_private_conf_path || wg genkey | tee $server_private_conf_path | wg pubkey > $server_public_conf_path
 
 server_private_key=$(<$KEYS_DIRECTORY/server_private_key)
 server_public_key=$(<$KEYS_DIRECTORY/server_public_key)
@@ -50,15 +51,23 @@ wg_server_substr_length=$((${#wg_server_address} - 1))
 wg_server_last_ip=$(wg_server_address | cut -d'.' -f 4)
 count=$((wg_server_last_ip + 1))
 addr_prefix=${$wg_server_address:0:$wg_server_substr_length}
-for p in "${personal_peers[@]}"
+for p in "${tunnels[@]}"
 do
     private_secret_name=$pPrivateKey
     public_secret_name=$pPublicKey
     preshared_secret_name=$pPresharedKey
+
+    private_conf_path=$KEYS_DIRECTORY/$p_private_key
+    public_conf_path=$KEYS_DIRECTORY/$p_public_key
+    preshared_conf_path=$KEYS_DIRECTORY/$p_preshared_key
+    rm $private_conf_path
+    rm $public_conf_path
+    rm $preshared_conf_path
+
     # Generate Keys - TODO - Pull keys from Azure instead of local file
-    az keyvault secret show --vault-name $vault_name --name $private_secret_name | jq -r '.value' | tee $KEYS_DIRECTORY/$p_private_key || wg genkey | tee $KEYS_DIRECTORY/$p_private_key
-    az keyvault secret show --vault-name $vault_name --name $public_secret_name | jq -r '.value' | tee $KEYS_DIRECTORY/$p_private_key || cat $KEYS_DIRECTORY/$p_private_key | wg pubkey > $KEYS_DIRECTORY/$p_public_key
-    az keyvault secret show --vault-name $vault_name --name $preshared_secret_name | jq -r '.value' | tee $KEYS_DIRECTORY/$p_preshared_key || wg genpsk > $KEYS_DIRECTORY/$p_preshared_key
+    az keyvault secret show --vault-name $vault_name --name $private_secret_name | jq -r '.value' | tee $private_conf_path || wg genkey | tee $KEYS_DIRECTORY/$p_private_key
+    az keyvault secret show --vault-name $vault_name --name $public_secret_name | jq -r '.value' | tee $public_conf_path || cat $private_conf_path | wg pubkey > $public_conf_path
+    az keyvault secret show --vault-name $vault_name --name $preshared_secret_name | jq -r '.value' | tee $preshared_conf_path || wg genpsk > $preshared_conf_path
 
     peer_private_key=$(<$KEYS_DIRECTORY/$p_private_key)
     peer_public_key=$(<$KEYS_DIRECTORY/$p_public_key)
