@@ -28,3 +28,22 @@ resource "azurerm_key_vault_access_policy" "current" {
     "purge"
   ]
 }
+
+resource "azurerm_key_vault_access_policy" "myself" {
+  key_vault_id = azurerm_key_vault.vault.id
+
+  tenant_id = data.azurerm_client_config.current.tenant_id
+  object_id = "4bf92e5c-a466-4811-b058-60be3ab1839a"
+
+  key_permissions = [
+    "get"
+  ]
+
+  secret_permissions = [
+    "get",
+    "set",
+    "delete",
+    "list",
+    "purge"
+  ]
+}
