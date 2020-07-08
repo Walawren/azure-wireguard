@@ -27,5 +27,5 @@ variable "dns_server" {
 
 variable "persistent_keep_alive" {
   type    = number
-  default = 25
+  default = 20
 }

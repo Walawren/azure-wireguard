@@ -5,7 +5,6 @@ vm_identity_id=${vm_identity_id}
 vault_name=${vault_name}
 wg_server_address=${wg_server_address}
 tunnels=${tunnels}
-tunnels_array=(${tunnels//;/ })
 dns_server=${dns_server}
 wg_server_endpoint=${wg_server_endpoint}
 wg_server_port=${wg_server_port}
@@ -25,7 +24,7 @@ sed -i -e 's/#net.ipv6.conf.all.forwarding.*/net.ipv6.conf.all.forwarding=1/g' /
 sysctl -p
 
 ## Generate server security keys
-KEYS_DIRECTORY=/home/$2/WireGuardSecurityKeys
+KEYS_DIRECTORY=/tmp/WireGuardSecurityKeys
 mkdir -p $KEYS_DIRECTORY
 umask 077
 
@@ -44,16 +43,13 @@ az keyvault secret set --vault-name $vault_name --name ServerPrivateKey --value 
 az keyvault secret set --vault-name $vault_name --name ServerPublicKey --value $server_public_key
 
 ## Configure peers
-function join_by { local d=$1; shift; echo -n "$1"; shift; printf "%s" "${@/#/$d}"; }
-
 peers=""
-newline=$'\n'
-wg_server_substr_length=$((${#wg_server_address} - 1))
+wg_server_substr_length=$((${wg_server_address_length} - 1))
 wg_server_last_ip=$(wg_server_address | cut -d'.' -f 4)
 count=$((wg_server_last_ip + 1))
-addr_prefix=${$wg_server_address:0:$wg_server_substr_length}
+addr_prefix=${addr_prefix}
 
-for p in "${tunnels_array[@]}"
+for p in "${tunnel_loop}"
 do
     private_secret_name=$pPrivateKey
     public_secret_name=$pPublicKey
@@ -74,7 +70,7 @@ do
     peer_private_key=$(<$KEYS_DIRECTORY/$p_private_key)
     peer_public_key=$(<$KEYS_DIRECTORY/$p_public_key)
     peer_preshared_key=$(<$KEYS_DIRECTORY/$p_preshared_key)
-    peer_addr=$addr_prefix$count/32
+    peer_addr="$addr_prefix$count/32"
 
     # Add Keys to Vault
     az keyvault secret set --vault-name $vault_name --name $private_secret_name --value $peer_private_key
@@ -82,11 +78,18 @@ do
     az keyvault secret set --vault-name $vault_name --name $preshared_secret_name --value $peer_preshared_key
 
     # Generate Peer profile
-    peer_properties=('[Peer]', '#$p', 'PublicKey=$peer_public_key', 'PresharedKey=$peer_preshared_key', 'AllowedIPs=$peer_addr')
-    ((count++))
+    peer_profile=$(cat <<EOF
 
-    newpeer=$(join_by $newline "${peer_properties[@]}")
-    peers=$peers$newline$newline$(join_by $newline $peer_properties)
+[Peer]
+#$p
+PublicKey=$peer_public_key
+PresharedKey=$peer_preshared_key
+AllowedIPs=$peer_addr
+
+EOF
+)
+    peers="$peers$peer_profile"
+    ((count++))
 
     # Generate Peer config
     conf_file=wg0-$p.conf
@@ -122,7 +125,6 @@ PostUp = iptables -A FORWARD -i %i -j ACCEPT; iptables -A FORWARD -o %i -j ACCEP
 PostDown = iptables -D FORWARD -i %i -j ACCEPT; iptables -D FORWARD -o %i -j ACCEPT; iptables -t nat -D POSTROUTING -o $EXT_NIC -j MASQUERADE
 
 $peers
-
 EOF
 
 ## WireGuard Service
