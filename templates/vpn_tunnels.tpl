@@ -1,17 +1,16 @@
 #!/bin/bash
 
 ## Input Variables
-vm_identity_id=${vm_identity_id}
-vault_name=${vault_name}
-wg_server_address=${wg_server_address}
-tunnels_string=${tunnels_string}
-tunnels=${tunnels}
-dns_server=${dns_server}
-wg_server_endpoint=${wg_server_endpoint}
-wg_server_port=${wg_server_port}
-persistent_keep_alive=${persistent_keep_alive}
-wg_server_address_with_cidr=${wg_server_address_with_cidr}
-wg_server_name=${wg_server_name}
+vm_identity_id="${vm_identity_id}"
+vault_name="${vault_name}"
+wg_server_address="${wg_server_address}"
+tunnels_string="${tunnels_string}"
+dns_server="${dns_server}"
+wg_server_endpoint="${wg_server_endpoint}"
+wg_server_port="${wg_server_port}"
+persistent_keep_alive="${persistent_keep_alive}"
+wg_server_address_with_cidr="${wg_server_address_with_cidr}"
+wg_server_name="${wg_server_name}"
 
 # Login in Azure
 az login --identity -u $vm_identity_id
@@ -47,6 +46,7 @@ wg_server_substr_length=$((${wg_server_address_length} - 1))
 count=${wg_server_last_ip}
 addr_prefix=${addr_prefix}
 
+tunnels=${tunnels}
 for t in "${tunnel_loop}"
 do
     private_secret_name="${t}PrivateKey"

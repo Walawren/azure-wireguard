@@ -31,11 +31,6 @@ resource "azurerm_linux_virtual_machine" "main" {
   network_interface_ids = [azurerm_network_interface.nic.id]
   size                  = "Standard_DS2_v2"
   computer_name         = "${lower(azurerm_resource_group.rgrp.name)}vm"
-  custom_data = base64encode(templatefile("./templates/vm_init.tpl", {
-    wg_server_cidr    = var.wg_server_cidr
-    wg_server_address = local.wg_server_address
-    wg_server_port    = var.wg_server_port
-  }))
 
   os_disk {
     name                 = "${azurerm_resource_group.rgrp.name}-VM-disk1"

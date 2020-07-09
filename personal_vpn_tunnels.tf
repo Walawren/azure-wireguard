@@ -6,6 +6,8 @@ resource "azurerm_virtual_machine_extension" "personal_tunnels" {
   type                 = "CustomScript"
   type_handler_version = "2.0"
 
+  depends_on = [azurerm_virtual_machine_extension.vm_init]
+
   protected_settings = <<PROT
 {
   "script": "${base64encode(templatefile("./templates/vpn_tunnels.tpl", {
