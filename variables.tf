@@ -10,6 +10,12 @@ variable "wg_server_port" {
   default     = 51820
 }
 
+variable "wg_server_name" {
+  type        = string
+  description = "Name of the network interface (e.g. 'wg0')"
+  default     = "wg0"
+}
+
 variable "personal_vpn_tunnels" {
   type        = list(string)
   description = "Pascal cased names of tunnels"

@@ -1,23 +1,24 @@
 #!/bin/bash
 
 ## Input Variables
-vm_identity_id=${vm_identity_id}
-vault_name=${vault_name}
-wg_server_address=${wg_server_address}
-tunnels_string=${tunnels_string}
-tunnels=${tunnels}
-dns_server=${dns_server}
-wg_server_endpoint=${wg_server_endpoint}
-wg_server_port=${wg_server_port}
-persistent_keep_alive=${persistent_keep_alive}
-wg_server_address_with_cidr=${wg_server_address_with_cidr}
-wg_server_name=${wg_server_name}
+# vm_identity_id=${vm_identity_id}
+vault_name="AzureWireGuard-KV"
+wg_server_address="10.1.3.1"
+tunnels_string="TestOne;Test2"
+tunnels=(${tunnels_string//;/ })
+dns_server="1.1.1.1"
+wg_server_endpoint="walawren.westcentralus.cloudapp.azure.com"
+wg_server_port=51820
+persistent_keep_alive=20
+wg_server_address_with_cidr="$wg_server_address/24"
+wg_server_name="wg0"
 
 # Login in Azure
-az login --identity -u $vm_identity_id
+echo "Must login first..."
+# az login --identity -u $vm_identity_id
 
 ## Generate server security keys
-CONF_DIRECTORY=/etc/wireguard
+CONF_DIRECTORY=./wireguard
 KEYS_DIRECTORY=./WireGuardSecurityKeys
 newline=$'\n'
 mkdir -p $CONF_DIRECTORY
@@ -43,11 +44,11 @@ az keyvault secret set --vault-name "$vault_name" --name "ServerPublicKey" --val
 
 ## Configure peers
 peers=""
-wg_server_substr_length=$((${wg_server_address_length} - 1))
-count=${wg_server_last_ip}
-addr_prefix=${addr_prefix}
+wg_server_substr_length=$((${#wg_server_address} - 1))
+count=${wg_server_address##*.}
+addr_prefix=${wg_server_address:0:wg_server_substr_length}
 
-for t in "${tunnel_loop}"
+for t in "${tunnels[@]}"
 do
     private_secret_name="${t}PrivateKey"
     public_secret_name="${t}PublicKey"
@@ -86,7 +87,8 @@ $newline
 PublicKey = $peer_public_key
 PresharedKey = $peer_preshared_key
 PersistentKeepAlive = $persistent_keep_alive
-AllowedIPs = $peer_addr$newline
+AllowedIPs = $peer_addr
+$newline
 EOF
 )
     peers="$peers$peer_profile"
@@ -98,7 +100,7 @@ EOF
 #$p
 PrivateKey = $peer_private_key
 Address = $peer_addr
-DNS=$dns_server$newline
+DNS = $dns_server$newline
 [Peer]
 #$wg_server_endpoint
 PublicKey = $server_public_key
@@ -109,7 +111,7 @@ PersistentKeepAlive = $persistent_keep_alive$newline
 EOF
 done
 
-## Wireguard config
+# Wireguard config
 EXT_NIC=$(route | grep '^default' | grep -o '[^ ]*$')
 
 conf_file=$wg_server_name.conf
@@ -124,16 +126,20 @@ PostDown = iptables -D FORWARD -i %i -j ACCEPT; iptables -D FORWARD -o %i -j ACC
 $peers
 EOF
 
-## IP Forwarding
-chown -R root:root $CONF_DIRECTORY/
-chmod -R og-rwx $CONF_DIRECTORY/*
-sed -i -e 's/#net.ipv4.ip_forward.*/net.ipv4.ip_forward=1/g' /etc/sysctl.conf
-sed -i -e 's/#net.ipv6.conf.all.forwarding.*/net.ipv6.conf.all.forwarding=1/g' /etc/sysctl.conf
-sysctl -p
+# ## IP Forwarding
+# chown -R root:root $CONF_DIRECTORY/
+chmod -R og-rw $CONF_DIRECTORY/*
+# sed -i -e 's/#net.ipv4.ip_forward.*/net.ipv4.ip_forward=1/g' /etc/sysctl.conf
+# sed -i -e 's/#net.ipv6.conf.all.forwarding.*/net.ipv6.conf.all.forwarding=1/g' /etc/sysctl.conf
+# sysctl -p
 
-## WireGuard Service
+# # WireGuard Service
+echo "The following error is fine:"
 wg-quick up $wg_server_name
 systemctl enable wg-quick@$wg_server_name
+echo "The following error is fine:"
+wg-quick down $wg_server_name
+systemctl disable wg-quick@$wg_server_name
 
-## Clean keys
-rm -rf $KEYS_DIRECTORY
+# Clean keys
+ rm -rf $KEYS_DIRECTORY
