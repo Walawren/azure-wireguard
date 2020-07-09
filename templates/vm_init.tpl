@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
 
+## Input Variables
+wg_server_port="${wg_server_port}"
+wg_server_cidr="${wg_server_cidr}"
+
 ## Install required packages
 apt-get -y update
 apt-get -y install ca-certificates curl apt-transport-https lsb-release gnupg jq
@@ -20,9 +24,16 @@ apt-get -y install azure-cli
 ## Firewall config to allow for traffic from clients
 
 ufw allow ssh
-ufw allow ${wg_server_port}/udp
-ufw allow from ${wg_server_cidr} to any port 53
-ufw allow from ${wg_server_cidr} to any port 80
-ufw allow from ${wg_server_cidr} to any port 443
+ufw allow $wg_server_port/udp
+ufw allow from $wg_server_cidr to any port 53
+ufw allow from $wg_server_cidr to any port 80
+ufw allow from $wg_server_cidr to any port 443
 ufw --force enable
+
+${personal_vpn_tunnels}
+
+## IP Forwarding
+sed -i -e 's/#net.ipv4.ip_forward.*/net.ipv4.ip_forward=1/g' /etc/sysctl.conf
+sed -i -e 's/#net.ipv6.conf.all.forwarding.*/net.ipv6.conf.all.forwarding=1/g' /etc/sysctl.conf
+sysctl -p
 
