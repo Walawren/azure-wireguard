@@ -1,4 +1,3 @@
-#!/bin/bash
 
 ## Input Variables
 vm_identity_id="${vm_identity_id}"
@@ -29,16 +28,16 @@ server_public_secret_path="${KEYS_DIRECTORY}/server_public_key"
 rm -f $server_private_secret_path
 rm -f $server_public_secret_path
 set -o pipefail
-az keyvault secret show --vault-name "$vault_name" --name "ServerPrivateKey" | jq -r '.value' > "$server_private_secret_path" || wg genkey > "$server_private_secret_path"
-az keyvault secret show --vault-name "$vault_name" --name "ServerPublicKey" | jq -r '.value' > "$server_public_secret_path" || cat "$server_private_secret_path" | wg pubkey > "$server_public_secret_path"
+az keyvault secret show --vault-name "$vault_name" --name "${server_name}ServerPrivateKey" | jq -r '.value' > "$server_private_secret_path" || wg genkey > "$server_private_secret_path"
+az keyvault secret show --vault-name "$vault_name" --name "${server_name}ServerPublicKey" | jq -r '.value' > "$server_public_secret_path" || cat "$server_private_secret_path" | wg pubkey > "$server_public_secret_path"
 set +o pipefail
 
 server_private_key=$(<$server_private_secret_path)
 server_public_key=$(<$server_public_secret_path)
 
 # Add Keys to vault
-az keyvault secret set --vault-name "$vault_name" --name "ServerPrivateKey" --value "$server_private_key"
-az keyvault secret set --vault-name "$vault_name" --name "ServerPublicKey" --value "$server_public_key"
+az keyvault secret set --vault-name "$vault_name" --name "${server_name}ServerPrivateKey" --value "$server_private_key"
+az keyvault secret set --vault-name "$vault_name" --name "${server_name}ServerPublicKey" --value "$server_public_key"
 
 ## Configure peers
 peers=""
@@ -109,7 +108,7 @@ PersistentKeepAlive = $persistent_keep_alive$newline
 EOF
 done
 
-## Wireguard config
+## Wireguard server config
 EXT_NIC=$(route | grep '^default' | grep -o '[^ ]*$')
 
 conf_file=$wg_server_name.conf
@@ -124,12 +123,8 @@ PostDown = iptables -D FORWARD -i %i -j ACCEPT; iptables -D FORWARD -o %i -j ACC
 $peers
 EOF
 
-## IP Forwarding
 chown -R root:root $CONF_DIRECTORY/
 chmod -R og-rwx $CONF_DIRECTORY/*
-sed -i -e 's/#net.ipv4.ip_forward.*/net.ipv4.ip_forward=1/g' /etc/sysctl.conf
-sed -i -e 's/#net.ipv6.conf.all.forwarding.*/net.ipv6.conf.all.forwarding=1/g' /etc/sysctl.conf
-sysctl -p
 
 ## WireGuard Service
 wg-quick up $wg_server_name
@@ -137,3 +132,4 @@ systemctl enable wg-quick@$wg_server_name
 
 ## Clean keys
 rm -rf $KEYS_DIRECTORY
+
