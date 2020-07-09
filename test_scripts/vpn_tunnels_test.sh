@@ -83,7 +83,7 @@ do
     peer_profile=$(cat <<EOF
 $newline
 [Peer]
-#$p
+#$t
 PublicKey = $peer_public_key
 PresharedKey = $peer_preshared_key
 PersistentKeepAlive = $persistent_keep_alive
@@ -97,7 +97,7 @@ EOF
     conf_file=$wg_server_name-$t.conf
     cat > $CONF_DIRECTORY/$conf_file << EOF
 [Interface]
-#$p
+#$t
 PrivateKey = $peer_private_key
 Address = $peer_addr
 DNS = $dns_server$newline

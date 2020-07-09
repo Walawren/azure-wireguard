@@ -38,7 +38,7 @@ locals {
     tunnels                  = "($${tunnels_string//;/ })"
     wg_server_address_length = "$${#wg_server_address}"
     wg_server_last_ip        = "$${wg_server_address##*.}"
-    addr_prefix              = "$${wg_server_address:0:wg_server_substr_length}"
+    addr_prefix_calc         = "$${wg_server_address:0:wg_server_substr_length}"
     tunnel_loop              = "$${tunnels[@]}"
     KEYS_DIRECTORY           = "$${KEYS_DIRECTORY}"
     t                        = "$${t}"

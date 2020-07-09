@@ -43,7 +43,7 @@ az keyvault secret set --vault-name "$vault_name" --name "${server_name}ServerPu
 peers=""
 wg_server_substr_length=$((${wg_server_address_length} - 1))
 count=${wg_server_last_ip}
-addr_prefix=${addr_prefix}
+addr_prefix=${addr_prefix_calc}
 
 tunnels=${tunnels}
 for t in "${tunnel_loop}"
@@ -81,7 +81,7 @@ do
     peer_profile=$(cat <<EOF
 $newline
 [Peer]
-#$p
+#$t
 PublicKey = $peer_public_key
 PresharedKey = $peer_preshared_key
 PersistentKeepAlive = $persistent_keep_alive
@@ -94,7 +94,7 @@ EOF
     conf_file=$wg_server_name-$t.conf
     cat > $CONF_DIRECTORY/$conf_file << EOF
 [Interface]
-#$p
+#$t
 PrivateKey = $peer_private_key
 Address = $peer_addr
 DNS=$dns_server$newline
