@@ -35,7 +35,7 @@ resource "azurerm_user_assigned_identity" "logic_app" {
 }
 
 resource "azurerm_role_assignment" "storage_reader" {
-  scope = azurerm_storage_container.wireguard_confs.id
+  scope = azurerm_storage_container.wireguard_confs.resource_manager_id
 
   role_definition_name = "Storage Blob Data Reader"
   principal_id         = azurerm_user_assigned_identity.logic_app.principal_id
