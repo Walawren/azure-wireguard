@@ -1,7 +1,3 @@
-locals {
-  wg_server_address = cidrhost(var.wg_server_cidr, 1)
-}
-
 resource "azurerm_network_interface" "nic" {
   name                = "${azurerm_resource_group.rgrp.name}-NIC"
   location            = azurerm_resource_group.rgrp.location
@@ -15,16 +11,6 @@ resource "azurerm_network_interface" "nic" {
   }
 
   enable_accelerated_networking = true
-}
-
-data "template_file" "vm_init_script" {
-  template = file("./templates/vm_init.tpl")
-
-  vars = {
-    wg_server_cidr    = var.wg_server_cidr
-    wg_server_address = local.wg_server_address
-    wg_server_port    = var.wg_server_port
-  }
 }
 
 resource "random_password" "vm_password" {
@@ -45,7 +31,11 @@ resource "azurerm_linux_virtual_machine" "main" {
   network_interface_ids = [azurerm_network_interface.nic.id]
   size                  = "Standard_DS2_v2"
   computer_name         = "${lower(azurerm_resource_group.rgrp.name)}vm"
-  custom_data           = base64encode(data.template_file.vm_init_script.rendered)
+  custom_data = base64encode(templatefile("./templates/vm_init.tpl", {
+    wg_server_cidr    = var.wg_server_cidr
+    wg_server_address = local.wg_server_address
+    wg_server_port    = var.wg_server_port
+  }))
 
   os_disk {
     name                 = "${azurerm_resource_group.rgrp.name}-VM-disk1"
