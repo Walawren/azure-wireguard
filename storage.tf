@@ -10,9 +10,3 @@ resource "azurerm_storage_account" "sa" {
   account_replication_type = "LRS"
 }
 
-resource "azurerm_storage_container" "wireguard_confs" {
-  name                  = "${local.lower_rgrp_name}confs"
-  storage_account_name  = azurerm_storage_account.sa.name
-  container_access_type = "private"
-}
-
