@@ -22,7 +22,6 @@ apt-get -y update
 apt-get -y install azure-cli
 
 ## Firewall config to allow for traffic from clients
-
 ufw allow ssh
 ufw allow $wg_server_port/udp
 ufw allow from $wg_server_cidr to any port 53
@@ -30,6 +29,7 @@ ufw allow from $wg_server_cidr to any port 80
 ufw allow from $wg_server_cidr to any port 443
 ufw --force enable
 
+## Wireguard Servers
 ${personal_vpn_tunnels}
 
 ${upload_configurations}
