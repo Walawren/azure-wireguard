@@ -13,6 +13,6 @@ tunnels=${tunnels}
 for t in "${tunnel_loop}"
 do
     conf_file=$wg_server_name-$t.conf
-    az storage blob upload --account-key $key --account-name $wg_storage_account_name -c $wg_conf_storage_container_name -n conf_file -f $CONF_DIRECTORY/$conf_file
+    az storage blob upload --account-key $key --account-name $wg_storage_account_name -c $wg_conf_storage_container_name -n $conf_file -f $CONF_DIRECTORY/$conf_file
 done
 
