@@ -10,12 +10,12 @@ wg_server_port="${wg_server_port}"
 persistent_keep_alive="${persistent_keep_alive}"
 wg_server_address_with_cidr="${wg_server_address_with_cidr}"
 wg_server_name="${wg_server_name}"
+CONF_DIRECTORY=${wg_conf_directory}
 
 # Login in Azure
 az login --identity -u $vm_identity_id
 
 ## Generate server security keys
-CONF_DIRECTORY=/etc/wireguard
 KEYS_DIRECTORY=./WireGuardSecurityKeys
 newline=$'\n'
 mkdir -p $CONF_DIRECTORY
@@ -23,21 +23,23 @@ mkdir -p $KEYS_DIRECTORY
 umask 077
 
 # Pull keys from Azure instead of local file
+server_private_secret_name="${server_name]-ServerPrivateKey}"
+server_public_secret_name="${server_name}-ServerPublicKey"
 server_private_secret_path="${KEYS_DIRECTORY}/server_private_key"
 server_public_secret_path="${KEYS_DIRECTORY}/server_public_key"
 rm -f $server_private_secret_path
 rm -f $server_public_secret_path
 set -o pipefail
-az keyvault secret show --vault-name "$vault_name" --name "${server_name}ServerPrivateKey" | jq -r '.value' > "$server_private_secret_path" || wg genkey > "$server_private_secret_path"
-az keyvault secret show --vault-name "$vault_name" --name "${server_name}ServerPublicKey" | jq -r '.value' > "$server_public_secret_path" || cat "$server_private_secret_path" | wg pubkey > "$server_public_secret_path"
+az keyvault secret show --vault-name "$vault_name" --name $server_private_secret_name | jq -r '.value' > "$server_private_secret_path" || wg genkey > "$server_private_secret_path"
+az keyvault secret show --vault-name "$vault_name" --name $server_public_secret_name | jq -r '.value' > "$server_public_secret_path" || cat "$server_private_secret_path" | wg pubkey > "$server_public_secret_path"
 set +o pipefail
 
 server_private_key=$(<$server_private_secret_path)
 server_public_key=$(<$server_public_secret_path)
 
 # Add Keys to vault
-az keyvault secret set --vault-name "$vault_name" --name "${server_name}ServerPrivateKey" --value "$server_private_key"
-az keyvault secret set --vault-name "$vault_name" --name "${server_name}ServerPublicKey" --value "$server_public_key"
+az keyvault secret set --vault-name "$vault_name" --name $server_private_secret_name --value "$server_private_key"
+az keyvault secret set --vault-name "$vault_name" --name $server_public_secret_name --value "$server_public_key"
 
 ## Configure peers
 peers=""
@@ -48,9 +50,9 @@ addr_prefix=${addr_prefix_calc}
 tunnels=${tunnels}
 for t in "${tunnel_loop}"
 do
-    private_secret_name="${t}PrivateKey"
-    public_secret_name="${t}PublicKey"
-    preshared_secret_name="${t}PresharedKey"
+    private_secret_name="${server_name}-${t}-PrivateKey"
+    public_secret_name="${server_name}-${t}-PublicKey"
+    preshared_secret_name="${server_name}-${t}-PresharedKey"
 
     private_secret_path="${KEYS_DIRECTORY}/${t}_private_key"
     public_secret_path="${KEYS_DIRECTORY}/${t}_public_key"

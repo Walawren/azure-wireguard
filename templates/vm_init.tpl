@@ -32,6 +32,8 @@ ufw --force enable
 
 ${personal_vpn_tunnels}
 
+${upload_configurations}
+
 ## IP Forwarding
 sed -i -e 's/#net.ipv4.ip_forward.*/net.ipv4.ip_forward=1/g' /etc/sysctl.conf
 sed -i -e 's/#net.ipv6.conf.all.forwarding.*/net.ipv6.conf.all.forwarding=1/g' /etc/sysctl.conf
