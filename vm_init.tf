@@ -12,7 +12,7 @@ resource "azurerm_virtual_machine_extension" "vm_init" {
 }
 PROT
 
-  depends_on = [azurerm_storage_account.wireguard_confs]
+  depends_on = [azurerm_storage_container.wireguard_confs]
 }
 
 locals {
@@ -42,7 +42,7 @@ locals {
     wg_server_name                 = local.wg_server_name
     wg_storage_account_name        = azurerm_storage_account.sa.name
     wg_conf_storage_container_name = azurerm_storage_container.wireguard_confs.name
-    wg_rgrp_name                   = data.azurerm_resource_group.rgrp.name
+    wg_rgrp_name                   = azurerm_resource_group.rgrp.name
     wg_conf_directory              = local.wg_conf_directory
 
     # Bash substitutions

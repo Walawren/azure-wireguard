@@ -23,7 +23,7 @@ mkdir -p $KEYS_DIRECTORY
 umask 077
 
 # Pull keys from Azure instead of local file
-server_private_secret_name="${server_name]-ServerPrivateKey}"
+server_private_secret_name="${server_name}-ServerPrivateKey"
 server_public_secret_name="${server_name}-ServerPublicKey"
 server_private_secret_path="${KEYS_DIRECTORY}/server_private_key"
 server_public_secret_path="${KEYS_DIRECTORY}/server_public_key"
