@@ -25,6 +25,19 @@ variable "personal_vpn_tunnels" {
   ]
 }
 
+variable "personal_vpn_tunnels" {
+  type = list(object({
+    name         = string
+    email        = string
+    phone_number = string
+  }))
+  description = "Pascal cased names of tunnels"
+  default = [
+    "Pixel4",
+    "WindowsLaptop"
+  ]
+}
+
 variable "dns_server" {
   type        = string
   description = "IP address for dns resolution"

@@ -16,7 +16,10 @@ PROT
 }
 
 locals {
-  tunnels_string    = join(";", var.personal_vpn_tunnels)
+  tunnels_string = join(";", [
+    for t in var.personal_vpn_tunnels :
+    t.name
+  ])
   wg_conf_directory = "/etc/wireguard"
   wg_server_name    = var.wg_server_name
 
