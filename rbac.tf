@@ -12,6 +12,13 @@ resource "azurerm_role_assignment" "vm_admin" {
   principal_id         = azurerm_user_assigned_identity.vm.principal_id
 }
 
+resource "azurerm_role_assignment" "storage_data_contributor" {
+  scope = azurerm_storage_account.sa.id
+
+  role_definition_name = "Storage Account Contributor"
+  principal_id         = azurerm_user_assigned_identity.vm.principal_id
+}
+
 resource "azurerm_key_vault_access_policy" "vm_identity" {
   key_vault_id = azurerm_key_vault.vault.id
 

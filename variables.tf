@@ -17,11 +17,22 @@ variable "wg_server_name" {
 }
 
 variable "personal_vpn_tunnels" {
-  type        = list(string)
-  description = "Pascal cased names of tunnels"
+  type = list(object({
+    name         = string # Pascal cased name of tunnel
+    email        = string # email to send encrypted conf file to
+    phone_number = string # phone number to send decyrption password to
+  }))
   default = [
-    "Pixel4",
-    "WindowsLaptop"
+    {
+      name         = "Pixel4"
+      email        = "e.carlson94@gmail.com"
+      phone_number = "4796849590"
+    },
+    {
+      name         = "WindowsLaptop"
+      email        = "e.carlson94@gmail.com"
+      phone_number = "4796849590"
+    }
   ]
 }
 
